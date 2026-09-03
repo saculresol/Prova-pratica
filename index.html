@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Portal de aulas e reserva antecipada de tapetes do estúdio Mente & Corpo.">
+  <title>Mente & Corpo | Yoga com presença</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#inicio" aria-label="Mente e Corpo, início">
+      <span class="brand-mark" aria-hidden="true">◒</span>
+      <span>Mente <i>&</i> Corpo</span>
+    </a>
+    <nav class="nav-links" aria-label="Navegação principal">
+      <a href="#agenda">Agenda</a>
+      <a href="#reserva">Reservar tapete</a>
+      <a href="#instrutor">Área do instrutor</a>
+    </nav>
+    <a class="button button-small button-dark" href="#reserva">Fazer reserva <span aria-hidden="true">↗</span></a>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="hero-copy">
+        <p class="eyebrow">Estúdio de yoga · Vila Madalena</p>
+        <h1>Um espaço para<br><em>voltar a si.</em></h1>
+        <p class="hero-text">Práticas que cabem na sua rotina e um tapete esperando por você. Consulte a agenda e faça seu check-in com antecedência.</p>
+        <div class="hero-actions">
+          <a class="button button-accent" href="#reserva">Reservar meu tapete <span aria-hidden="true">↗</span></a>
+          <a class="text-link" href="#agenda">Ver horários <span aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+      <div class="hero-art" aria-label="Ilustração de uma pessoa praticando yoga">
+        <div class="sun"></div>
+        <div class="arch arch-back"></div>
+        <div class="arch arch-front"></div>
+        <div class="figure figure-head"></div>
+        <div class="figure figure-body"></div>
+        <div class="figure figure-leg-left"></div>
+        <div class="figure figure-leg-right"></div>
+        <div class="figure figure-arm-left"></div>
+        <div class="figure figure-arm-right"></div>
+        <div class="plant plant-one"><span></span><span></span><span></span></div>
+        <div class="plant plant-two"><span></span><span></span></div>
+      </div>
+      <div class="hero-note"><strong>01</strong><span>Presença<br>antes da prática</span></div>
+    </section>
+
+    <section class="intro-band">
+      <p class="eyebrow">Práticas para todos os corpos</p>
+      <p class="intro-statement">Respirar melhor, mover com intenção e encontrar equilíbrio no meio da cidade.</p>
+      <div class="intro-meta"><span>●</span> Pequenos grupos · atenção individual</div>
+    </section>
+
+    <section class="section agenda-section" id="agenda">
+      <div class="section-heading">
+        <div><p class="eyebrow">Escolha seu momento</p><h2>Agenda da semana</h2></div>
+        <p class="section-aside">Vagas atualizadas em tempo real<br><span class="status-dot"></span> ambiente operacional</p>
+      </div>
+      <div class="schedule-grid" id="scheduleGrid" aria-live="polite"></div>
+    </section>
+
+    <section class="reservation-section" id="reserva">
+      <div class="reservation-aside"><p class="eyebrow">Seu próximo passo</p><h2>Chegue com<br><em>espaço.</em></h2><p>Reserve seu tapete até 30 minutos antes da aula. Ao chegar, informe seu nome na recepção e respire fundo.</p><div class="capacity-note"><span class="capacity-icon">◌</span><span><strong>8 tapetes</strong><br>por turma, no máximo</span></div></div>
+      <form class="reservation-form" id="reservationForm" novalidate>
+        <div class="form-heading"><span>02</span><h3>Fazer check-in</h3></div>
+        <label for="studentName">Seu nome completo</label>
+        <input id="studentName" name="studentName" type="text" placeholder="Ex.: Lucas Pimentel Bento" autocomplete="name" required>
+        <label for="classSelect">Escolha uma aula</label>
+        <select id="classSelect" name="classSelect" required><option value="">Selecione um horário</option></select>
+        <button class="button button-accent button-submit" type="submit">Confirmar reserva <span aria-hidden="true">↗</span></button>
+        <p class="form-message" id="formMessage" role="status"></p>
+        <small>Ao confirmar, seu nome fica disponível para o instrutor responsável pela turma.</small>
+      </form>
+    </section>
+
+    <section class="instructor-section section" id="instrutor">
+      <div class="section-heading instructor-heading"><div><p class="eyebrow">Visão operacional</p><h2>Painel do instrutor</h2></div><button class="button button-outline" id="clearReservations" type="button">Limpar reservas</button></div>
+      <div class="dashboard-bar"><div><span class="dashboard-number" id="reservationCount">0</span><span>reservas confirmadas</span></div><div class="dashboard-date" id="todayLabel"></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Praticante</th><th>Aula</th><th>Data e horário</th><th>Status</th></tr></thead><tbody id="reservationTable"><tr class="empty-row"><td colspan="4">Ainda não há reservas. Elas aparecerão aqui após o check-in.</td></tr></tbody></table></div>
+    </section>
+  </main>
+
+  <footer><div class="brand footer-brand"><span class="brand-mark" aria-hidden="true">◒</span><span>Mente <i>&</i> Corpo</span></div><p>Rua Harmonia, 218 · São Paulo, SP</p><p>© 2026 Mente & Corpo</p></footer>
+  <script src="app.js"></script>
+</body>
+</html>
