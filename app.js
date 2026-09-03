@@ -9,9 +9,43 @@ const classes = [
   { id: 'sab-0930', day: 'SAB', date: '12 OUT', time: '09:30', name: 'Pratica coletiva', teacher: 'com equipe M&C', spots: 7 }
 ];
 const storageKey = 'mente-corpo-reservas';
-const getReservations = () => JSON.parse(localStorage.getItem(storageKey) || '[]');
-const saveReservations = (reservations) => localStorage.setItem(storageKey, JSON.stringify(reservations));
-const reservedFor = (classId) => getReservations().filter((reservation) => reservation.classId === classId).length;
+const apiBaseUrl = (window.MENTE_CORPO_API_URL || '').replace(/\/$/, '');
+let reservations = JSON.parse(localStorage.getItem(storageKey) || '[]');
+const getReservations = () => reservations;
+const saveLocalReservations = (nextReservations) => {
+  reservations = nextReservations;
+  localStorage.setItem(storageKey, JSON.stringify(reservations));
+};
+const reservedFor = (classId) => reservations.filter((reservation) => reservation.classId === classId).length;
+
+async function loadReservations() {
+  if (!apiBaseUrl) return;
+  const response = await fetch(`${apiBaseUrl}/reservas`);
+  if (!response.ok) throw new Error('Não foi possível carregar as reservas.');
+  reservations = await response.json();
+}
+
+async function createReservation(reservation) {
+  if (!apiBaseUrl) {
+    saveLocalReservations([...reservations, reservation]);
+    return reservation;
+  }
+  const response = await fetch(`${apiBaseUrl}/reservas`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(reservation)
+  });
+  if (!response.ok) throw new Error((await response.json().catch(() => ({}))).message || 'Não foi possível confirmar a reserva.');
+  const created = await response.json();
+  reservations = [...reservations, created];
+  return created;
+}
+
+async function clearAllReservations() {
+  if (apiBaseUrl) {
+    const response = await fetch(`${apiBaseUrl}/reservas`, { method: 'DELETE' });
+    if (!response.ok) throw new Error('Não foi possível limpar as reservas.');
+  }
+  saveLocalReservations([]);
+}
 
 function renderSchedule() {
   const grid = document.querySelector('#scheduleGrid');
@@ -45,7 +79,7 @@ function renderDashboard() {
   table.innerHTML = reservations.slice().reverse().map((reservation) => `<tr><td><strong>${reservation.name}</strong></td><td>${reservation.className}</td><td>${reservation.day}, ${reservation.date} · ${reservation.time}</td><td><span class="badge">Confirmada</span></td></tr>`).join('');
 }
 
-document.querySelector('#reservationForm').addEventListener('submit', (event) => {
+document.querySelector('#reservationForm')?.addEventListener('submit', async (event) => {
   event.preventDefault();
   const name = document.querySelector('#studentName').value.trim();
   const classId = document.querySelector('#classSelect').value;
@@ -61,19 +95,35 @@ document.querySelector('#reservationForm').addEventListener('submit', (event) =>
     message.className = 'form-message error';
     renderSchedule(); renderClassOptions(); return;
   }
-  const reservations = getReservations();
-  reservations.push({ name, classId, className: selectedClass.name, day: selectedClass.day, date: selectedClass.date, time: selectedClass.time, createdAt: new Date().toISOString() });
-  saveReservations(reservations);
-  message.textContent = `Reserva confirmada para ${selectedClass.day}, ${selectedClass.date}, as ${selectedClass.time}.`;
-  message.className = 'form-message success';
-  event.target.reset();
-  renderSchedule(); renderClassOptions(); renderDashboard();
-});
-
-document.querySelector('#clearReservations').addEventListener('click', () => {
-  if (getReservations().length && window.confirm('Remover todas as reservas deste dispositivo?')) {
-    saveReservations([]); renderSchedule(); renderClassOptions(); renderDashboard();
+  try {
+    await createReservation({ name, classId, className: selectedClass.name, day: selectedClass.day, date: selectedClass.date, time: selectedClass.time, createdAt: new Date().toISOString() });
+    message.textContent = `Reserva confirmada para ${selectedClass.day}, ${selectedClass.date}, as ${selectedClass.time}.`;
+    message.className = 'form-message success';
+    event.target.reset();
+    renderSchedule(); renderClassOptions(); renderDashboard();
+  } catch (error) {
+    message.textContent = error.message;
+    message.className = 'form-message error';
   }
 });
 
-renderSchedule(); renderClassOptions(); renderDashboard();
+document.querySelector('#clearReservations')?.addEventListener('click', async () => {
+  if (getReservations().length && window.confirm('Remover todas as reservas deste dispositivo?')) {
+    await clearAllReservations(); renderSchedule(); renderClassOptions(); renderDashboard();
+  }
+});
+
+loadReservations().then(() => {
+  if (document.querySelector('#scheduleGrid')) {
+    renderSchedule();
+    renderClassOptions();
+  }
+  if (document.querySelector('#reservationTable')) renderDashboard();
+}).catch((error) => {
+  console.error(error);
+  if (document.querySelector('#formMessage')) {
+    document.querySelector('#formMessage').textContent = 'Não foi possível conectar ao servidor de reservas.';
+    document.querySelector('#formMessage').className = 'form-message error';
+  }
+  if (document.querySelector('#reservationTable')) renderDashboard();
+});

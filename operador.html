@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Mente & Corpo | Operador</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="Voltar ao portal do aluno">
+      <span class="brand-mark" aria-hidden="true">◒</span>
+      <span>Mente <i>&</i> Corpo</span>
+    </a>
+    <span class="operator-label">Área restrita · operador</span>
+    <a class="button button-small button-dark" href="index.html">Portal do aluno <span aria-hidden="true">↗</span></a>
+  </header>
+
+  <main>
+    <section class="operator-hero">
+      <p class="eyebrow">Visão operacional</p>
+      <h1>Reservas da<br><em>semana.</em></h1>
+      <p>Acompanhe os praticantes confirmados e prepare a recepção de cada turma.</p>
+    </section>
+    <section class="instructor-section section operator-dashboard" id="instrutor">
+      <div class="section-heading instructor-heading"><div><p class="eyebrow">Check-in dos praticantes</p><h2>Painel do instrutor</h2></div><button class="button button-outline" id="clearReservations" type="button">Limpar reservas</button></div>
+      <div class="dashboard-bar"><div><span class="dashboard-number" id="reservationCount">0</span><span>reservas confirmadas</span></div><div class="dashboard-date" id="todayLabel"></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Praticante</th><th>Aula</th><th>Data e horário</th><th>Status</th></tr></thead><tbody id="reservationTable"><tr class="empty-row"><td colspan="4">Ainda não há reservas. Elas aparecerão aqui após o check-in.</td></tr></tbody></table></div>
+    </section>
+  </main>
+  <footer><div class="brand footer-brand"><span class="brand-mark" aria-hidden="true">◒</span><span>Mente <i>&</i> Corpo</span></div><p>Uso interno do estúdio</p><p><a href="index.html">Voltar ao portal público</a></p></footer>
+  <script src="api-config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

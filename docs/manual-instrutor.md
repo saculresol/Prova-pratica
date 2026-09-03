@@ -2,7 +2,7 @@
 
 ## Acompanhar a turma
 
-1. Abra o portal e role até **Painel do instrutor**.
+1. Abra a tela restrita em `operador.html` (em produção, use o endereço protegido fornecido pela administração).
 2. Confira o contador de reservas e a tabela de praticantes.
 3. Use dia, horário e nome da aula para organizar a recepção.
 4. Considere como confirmadas apenas as linhas com o selo **Confirmada**.

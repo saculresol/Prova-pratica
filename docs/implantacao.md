@@ -2,17 +2,17 @@
 
 **Projeto:** Portal do aluno Mente & Corpo  
 **Responsável:** Lucas Pimentel Bento  
-**Data-base:** 03/09/2026
+**Data-base:** 05/09/2026
 
 ## 1. Arquitetura proposta
 
-- **Frontend:** arquivos estáticos HTML, CSS e JavaScript publicados em Amazon S3 + CloudFront (ou GitHub Pages para homologação).
+- **Frontend:** portal público em `index.html` e tela restrita em `operador.html`, publicados em Amazon S3 + CloudFront (ou GitHub Pages para homologação).
 - **API:** AWS API Gateway com Lambda `POST /reservas` e `GET /reservas`.
 - **Banco:** DynamoDB, tabela `Reservas`, com `id` como chave e `aulaId` como índice secundário.
 - **Domínio:** `mentecorpo.yoga` (simulado nesta prova) administrado no Route 53.
 - **Segurança:** HTTPS obrigatório, CORS restrito ao domínio, validação de nome/aula na API, IAM com menor privilégio e logs no CloudWatch.
 
-Nesta entrega, o `localStorage` representa a camada de persistência em ambiente de demonstração. A interface, as regras de lotação e o fluxo de operação são os mesmos da versão publicada.
+Nesta entrega, o `localStorage` representa a camada de persistência em ambiente de demonstração. A interface pública e a interface operacional são arquivos separados, mas compartilham a mesma chave de demonstração. Em produção, `operador.html` deve ser protegido por autenticação e o acesso ao painel não deve ficar disponível ao aluno.
 
 ## 2. Provisionamento
 
