@@ -10,13 +10,32 @@ const classes = [
 ];
 const storageKey = 'mente-corpo-reservas';
 const apiBaseUrl = (window.MENTE_CORPO_API_URL || '').replace(/\/$/, '');
-let reservations = JSON.parse(localStorage.getItem(storageKey) || '[]');
+const readStoredReservations = () => {
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.warn('Reservas locais inválidas. Resetando armazenamento.', error);
+    localStorage.setItem(storageKey, JSON.stringify([]));
+    return [];
+  }
+};
+let reservations = readStoredReservations();
 const getReservations = () => reservations;
 const saveLocalReservations = (nextReservations) => {
   reservations = nextReservations;
   localStorage.setItem(storageKey, JSON.stringify(reservations));
 };
 const reservedFor = (classId) => reservations.filter((reservation) => reservation.classId === classId).length;
+const hasReservationForStudent = (name, classId) => reservations.some((reservation) => reservation.classId === classId && reservation.name.trim().toLowerCase() === name.trim().toLowerCase());
+const setFormMessage = (message, type) => {
+  const formMessage = document.querySelector('#formMessage');
+  if (!formMessage) return;
+  formMessage.textContent = message;
+  formMessage.className = type ? `form-message ${type}` : 'form-message';
+};
 
 async function loadReservations() {
   if (!apiBaseUrl) return;
@@ -49,6 +68,7 @@ async function clearAllReservations() {
 
 function renderSchedule() {
   const grid = document.querySelector('#scheduleGrid');
+  if (!grid) return;
   const grouped = classes.reduce((days, item) => ({ ...days, [item.day]: [...(days[item.day] || []), item] }), {});
   grid.innerHTML = Object.entries(grouped).map(([day, dayClasses]) => `
     <div class="day-column"><div class="day-header"><strong>${day}</strong><span>${dayClasses[0].date}</span></div>
@@ -61,6 +81,7 @@ function renderSchedule() {
 
 function renderClassOptions() {
   const select = document.querySelector('#classSelect');
+  if (!select) return;
   select.innerHTML = '<option value="">Selecione um horario</option>' + classes.map((item) => {
     const remaining = item.spots - reservedFor(item.id);
     return `<option value="${item.id}" ${remaining === 0 ? 'disabled' : ''}>${item.day}, ${item.date} - ${item.time} · ${item.name}${remaining === 0 ? ' · lotada' : ` · ${remaining} vagas`}</option>`;
@@ -68,10 +89,14 @@ function renderClassOptions() {
 }
 
 function renderDashboard() {
-  const reservations = getReservations();
-  document.querySelector('#reservationCount').textContent = reservations.length;
-  document.querySelector('#todayLabel').textContent = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
+  const countNode = document.querySelector('#reservationCount');
+  const dateNode = document.querySelector('#todayLabel');
   const table = document.querySelector('#reservationTable');
+  if (!countNode || !dateNode || !table) return;
+
+  const reservations = getReservations();
+  countNode.textContent = reservations.length;
+  dateNode.textContent = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date());
   if (!reservations.length) {
     table.innerHTML = '<tr class="empty-row"><td colspan="4">Ainda nao ha reservas. Elas aparecerao aqui apos o check-in.</td></tr>';
     return;
@@ -83,27 +108,26 @@ document.querySelector('#reservationForm')?.addEventListener('submit', async (ev
   event.preventDefault();
   const name = document.querySelector('#studentName').value.trim();
   const classId = document.querySelector('#classSelect').value;
-  const message = document.querySelector('#formMessage');
   const selectedClass = classes.find((item) => item.id === classId);
   if (name.length < 3 || !selectedClass) {
-    message.textContent = 'Preencha seu nome e escolha uma aula para continuar.';
-    message.className = 'form-message error';
+    setFormMessage('Preencha seu nome e escolha uma aula para continuar.', 'error');
+    return;
+  }
+  if (hasReservationForStudent(name, classId)) {
+    setFormMessage('Você já possui uma reserva para este horário. Escolha outra aula.', 'error');
     return;
   }
   if (reservedFor(classId) >= selectedClass.spots) {
-    message.textContent = 'Esta turma acabou de lotar. Escolha outro horario.';
-    message.className = 'form-message error';
+    setFormMessage('Esta turma acabou de lotar. Escolha outro horario.', 'error');
     renderSchedule(); renderClassOptions(); return;
   }
   try {
     await createReservation({ name, classId, className: selectedClass.name, day: selectedClass.day, date: selectedClass.date, time: selectedClass.time, createdAt: new Date().toISOString() });
-    message.textContent = `Reserva confirmada para ${selectedClass.day}, ${selectedClass.date}, as ${selectedClass.time}.`;
-    message.className = 'form-message success';
+    setFormMessage(`Reserva confirmada para ${selectedClass.day}, ${selectedClass.date}, as ${selectedClass.time}.`, 'success');
     event.target.reset();
     renderSchedule(); renderClassOptions(); renderDashboard();
   } catch (error) {
-    message.textContent = error.message;
-    message.className = 'form-message error';
+    setFormMessage(error.message, 'error');
   }
 });
 
@@ -121,9 +145,6 @@ loadReservations().then(() => {
   if (document.querySelector('#reservationTable')) renderDashboard();
 }).catch((error) => {
   console.error(error);
-  if (document.querySelector('#formMessage')) {
-    document.querySelector('#formMessage').textContent = 'Não foi possível conectar ao servidor de reservas.';
-    document.querySelector('#formMessage').className = 'form-message error';
-  }
+  setFormMessage('Não foi possível conectar ao servidor de reservas.', 'error');
   if (document.querySelector('#reservationTable')) renderDashboard();
 });
